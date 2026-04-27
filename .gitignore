@@ -1,0 +1,15 @@
+echo Temp/ >> .gitignore
+echo Library/ >> .gitignore
+echo Logs/ >> .gitignore
+echo obj/ >> .gitignoreLibrary/  
+Temp/  
+Logs/  
+obj/  
+.vs/ 
+Library/  
+Temp/  
+Logs/  
+obj/ 
+Library/  
+Temp/  
+Logs/ 
