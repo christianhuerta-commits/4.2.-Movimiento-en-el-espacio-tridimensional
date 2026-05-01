@@ -1,35 +1,66 @@
 using UnityEngine;
-using TMPro; // Necesario para TextMeshPro
+using TMPro;
 
 public class ControladorPelota : MonoBehaviour
 {
     private Rigidbody rb;
-    public float fuerzaInicial = 5f; // Fuerza con la que empezará a moverse
+    public float fuerzaImpulso = 5f; 
+    public float aumentoVelocidad = 1.5f; 
+    
     private int contadorRebotes = 0;
-    public TMP_Text textoRebotes; // Referencia al texto de la UI
+    private int nivelActual = 1;
+
+    public TMP_Text textoPrincipal; // El que sube 1, 2, 3...
+    public TMP_Text textoNivel;     // El que dice "¡NIVEL SUPERADO!"
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        // Dar un empujón inicial diagonal para que no caiga recta
-        Vector3 direccionInicial = new Vector3(Random.Range(-1f, 1f), -1f, Random.Range(-1f, 1f)).normalized;
-        rb.AddForce(direccionInicial * fuerzaInicial, ForceMode.Impulse);
+        if(textoNivel != null) textoNivel.text = ""; // Empezar vacío
+        ActualizarInterfaz();
+        LanzarPelota();
     }
 
-    // Esta función se ejecuta cuando la pelota choca con algo
     private void OnCollisionEnter(Collision collision)
     {
-        // Verificamos si chocó con el plano (Suelo)
-        // Nota: Asegúrate de que tu objeto Plano en la jerarquía tenga el nombre "Plane"
+        // Verifica que tu suelo se llame "Plane" exactamente
         if (collision.gameObject.name == "Plane")
         {
             contadorRebotes++;
-            ActualizarTexto();
+            
+            // Lógica de cada 10 rebotes
+            if (contadorRebotes % 10 == 0)
+            {
+                if(textoNivel != null) textoNivel.text = "¡NIVEL " + nivelActual + " SUPERADO!";
+                
+                nivelActual++;
+                fuerzaImpulso += aumentoVelocidad; 
+                
+                // Borrar el mensaje tras 2 segundos
+                Invoke("LimpiarMensaje", 2f);
+            }
+
+            rb.linearVelocity = Vector3.zero; 
+            rb.AddForce(Vector3.up * fuerzaImpulso, ForceMode.Impulse);
+
+            ActualizarInterfaz();
         }
     }
 
-    void ActualizarTexto()
+    void ActualizarInterfaz()
     {
-        textoRebotes.text = "Rebotes: " + contadorRebotes;
+        if(textoPrincipal != null) 
+            textoPrincipal.text = "Rebotes: " + contadorRebotes;
+    }
+
+    void LimpiarMensaje()
+    {
+        if(textoNivel != null) textoNivel.text = "";
+    }
+
+    void LanzarPelota()
+    {
+        Vector3 direccion = new Vector3(Random.Range(-0.5f, 0.5f), -1f, Random.Range(-0.5f, 0.5f)).normalized;
+        rb.AddForce(direccion * fuerzaImpulso, ForceMode.Impulse);
     }
 }
